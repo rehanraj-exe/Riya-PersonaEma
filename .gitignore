@@ -1,0 +1,8 @@
+node_modules/
+.env*
+!*.env.example
+.next/
+dist/
+*.db
+*.db-journal
+.prisma/

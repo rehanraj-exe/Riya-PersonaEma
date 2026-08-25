@@ -1,0 +1,49 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("Employee") // Admin, Manager, Support, Employee
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  emails    Email[]
+}
+
+model Email {
+  id          String   @id @default(cuid())
+  messageId   String   @unique
+  subject     String
+  body        String
+  snippet     String?
+  sender      String
+  receiver    String
+  status      String   @default("Pending") // Pending, Resolved, Ignored
+  receivedAt  DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  analysis    Analysis?
+  userId      String?
+  assignedTo  User?    @relation(fields: [userId], references: [id])
+}
+
+model Analysis {
+  id              String   @id @default(cuid())
+  emailId         String   @unique
+  email           Email    @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  category        String   // Support, Sales, Finance, HR, etc.
+  sentiment       String   // Positive, Neutral, Negative
+  priority        String   // Critical, High, Medium, Low
+  confidenceScore Float
+  department      String   // Suggested department
+  suggestedReply  String?
+  createdAt       DateTime @default(now())
+}
