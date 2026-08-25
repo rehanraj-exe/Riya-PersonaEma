@@ -1,4 +1,4 @@
-# Riya PersonaEma 🤖✉️
+# Riya PersonaEmma 🤖✉️
 
 **Your Personal AI Email Agent & Inbox Triage Assistant**
 
