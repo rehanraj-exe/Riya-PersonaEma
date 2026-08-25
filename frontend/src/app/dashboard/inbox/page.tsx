@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, MoreHorizontal, Star, AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { Search, Filter, MoreHorizontal, Star, AlertCircle, Clock, CheckCircle2, Sparkles } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const priorityColors = {
@@ -85,51 +85,87 @@ export default function InboxPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.05 }}
-                    className="group flex items-center gap-4 p-4 rounded-xl glass hover:bg-secondary/20 transition-all cursor-pointer border border-transparent hover:border-border"
+                    className="group flex flex-col p-4 rounded-xl glass hover:bg-secondary/20 transition-all cursor-pointer border border-transparent hover:border-border"
                   >
-                    <div className="flex-shrink-0 pt-1">
-                      <button className="text-muted-foreground hover:text-yellow-500 transition-colors">
-                        <Star className="w-5 h-5" />
-                      </button>
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium truncate">{email.sender}</span>
-                        <span className="text-xs text-muted-foreground shrink-0">
-                          {formatDistanceToNow(new Date(email.receivedAt), { addSuffix: true })}
-                        </span>
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 pt-1">
+                        <button className="text-muted-foreground hover:text-yellow-500 transition-colors">
+                          <Star className="w-5 h-5" />
+                        </button>
                       </div>
-                      <p className="text-sm text-foreground truncate font-semibold">{email.subject}</p>
-                      <div className="flex flex-wrap items-center gap-2 mt-2">
-                        {email.analysis?.priority && (
-                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${pColor}`}>
-                            {email.analysis.priority}
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium truncate">{email.sender}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {formatDistanceToNow(new Date(email.receivedAt), { addSuffix: true })}
                           </span>
+                        </div>
+                        <p className="text-sm text-foreground truncate font-semibold">{email.subject}</p>
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          {email.analysis?.priority && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${pColor}`}>
+                              {email.analysis.priority}
+                            </span>
+                          )}
+                          {email.analysis?.category && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground border border-border">
+                              {email.analysis.category}
+                            </span>
+                          )}
+                          {email.analysis?.confidenceScore && (
+                            <span className="text-xs text-muted-foreground">
+                              AI Confidence: {Math.round(email.analysis.confidenceScore * 100)}%
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {email.status === "Pending" && (
+                          <button className="p-2 rounded-md hover:bg-emerald-500/10 text-emerald-500 transition-colors tooltip-trigger" title="Resolve">
+                            <CheckCircle2 className="w-5 h-5" />
+                          </button>
                         )}
-                        {email.analysis?.category && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground border border-border">
-                            {email.analysis.category}
-                          </span>
-                        )}
-                        {email.analysis?.confidenceScore && (
-                          <span className="text-xs text-muted-foreground">
-                            AI Confidence: {Math.round(email.analysis.confidenceScore * 100)}%
-                          </span>
-                        )}
+                        <button className="p-2 rounded-md hover:bg-secondary transition-colors text-muted-foreground" title="More">
+                          <MoreHorizontal className="w-5 h-5" />
+                        </button>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {email.status === "Pending" && (
-                        <button className="p-2 rounded-md hover:bg-emerald-500/10 text-emerald-500 transition-colors tooltip-trigger" title="Resolve">
-                          <CheckCircle2 className="w-5 h-5" />
-                        </button>
-                      )}
-                      <button className="p-2 rounded-md hover:bg-secondary transition-colors text-muted-foreground" title="More">
-                        <MoreHorizontal className="w-5 h-5" />
-                      </button>
-                    </div>
+                    {/* AI Draft Response Block for Urgent Emails */}
+                    {(email.analysis?.priority === "Critical" || email.analysis?.priority === "High") && email.analysis?.suggestedReply && (
+                      <div className="mt-4 ml-9 p-3 rounded-lg bg-primary/5 border border-primary/20 relative">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-semibold text-primary flex items-center gap-1">
+                            <Sparkles className="w-3 h-3" />
+                            AI Draft Response
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(email.analysis.suggestedReply);
+                                // could add a toast here
+                              }}
+                              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 bg-secondary rounded-md"
+                            >
+                              Copy
+                            </button>
+                            <a 
+                              href={`mailto:${email.sender}?subject=Re: ${encodeURIComponent(email.subject)}&body=${encodeURIComponent(email.analysis.suggestedReply)}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-xs font-medium text-primary-foreground bg-primary hover:bg-primary/90 transition-colors px-2 py-1 rounded-md"
+                            >
+                              Reply
+                            </a>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap font-mono">
+                          {email.analysis.suggestedReply}
+                        </p>
+                      </div>
+                    )}
                   </motion.div>
                 );
               })}

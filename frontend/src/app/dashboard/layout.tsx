@@ -14,7 +14,6 @@ function cn(...inputs: ClassValue[]) {
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/inbox", label: "Inbox", icon: Inbox },
-  { href: "/dashboard/team", label: "Team", icon: Users },
   { href: "/dashboard/analytics", label: "Analytics", icon: Activity },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];

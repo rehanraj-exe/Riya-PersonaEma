@@ -52,18 +52,26 @@ export async function GET(request: Request) {
         // Note: mailparser expects a buffer/string. 
         // This is a simplified extraction; full production uses standard `simpleParser` stream.
         const parsed = await simpleParser(all.body);
-        const from = item.attributes.date ? item.attributes.date.toISOString() : "Unknown Sender";
+        const from = (header.body as any)?.from?.[0] || "Unknown Sender";
         const subjectRaw = (header.body as any)?.subject?.[0] || "No Subject";
+        const messageId = (header.body as any)?.['message-id']?.[0] || `${Date.now()}-${Math.random()}`;
+        const dateRaw = item.attributes.date ? new Date(item.attributes.date) : new Date();
+        const to = (header.body as any)?.to?.[0] || process.env.IMAP_USER || "Unknown Receiver";
         
-        const bodyText = parsed.text || "No Body";
+        const bodyText = parsed.text || parsed.html || "No Body";
 
         // Analyze with Gemini
         const analysis = await analyzeEmail(subjectRaw, bodyText, from);
 
         // Save to DB
-        await prisma.email.create({
-          data: {
+        await prisma.email.upsert({
+          where: { messageId },
+          update: {},
+          create: {
+            messageId,
             sender: from,
+            receiver: to,
+            receivedAt: dateRaw,
             subject: subjectRaw,
             body: bodyText,
             analysis: {

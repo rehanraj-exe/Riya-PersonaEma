@@ -60,7 +60,7 @@ export async function analyzeEmail(subject: string, body: string, sender: string
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -69,8 +69,9 @@ export async function analyzeEmail(subject: string, body: string, sender: string
       }
     });
 
-    if (response.text) {
-      return JSON.parse(response.text);
+    const text = response.text;
+    if (text) {
+      return JSON.parse(text);
     }
     throw new Error("Empty response from Gemini");
 
