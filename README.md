@@ -1,8 +1,8 @@
-# Riya PersonaEmma 🤖✉️
+# Riya-PersonaEmma 🤖✉️
 
 **Your Personal AI Email Agent & Inbox Triage Assistant**
 
-Riya PersonaEma is an intelligent, automated email management dashboard that acts as your personal executive assistant. It hooks directly into your real email inbox, reads incoming messages, and uses Google's Gemini AI to aggressively filter spam, categorize topics, highlight critical priorities, and automatically draft replies so you can achieve Inbox Zero in seconds.
+Riya PersonaEmma is an intelligent, automated email management dashboard that acts as your personal executive assistant. It hooks directly into your real email inbox, reads incoming messages, and uses Google's Gemini AI to aggressively filter spam, categorize topics, highlight critical priorities, and automatically draft replies so you can achieve Inbox Zero in seconds.
 
 ---
 
