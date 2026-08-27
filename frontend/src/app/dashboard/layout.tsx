@@ -80,7 +80,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           
           <div className="flex items-center gap-4">
-            <UserButton afterSignOutUrl="/" />
+            <UserButton />
           </div>
         </header>
 
