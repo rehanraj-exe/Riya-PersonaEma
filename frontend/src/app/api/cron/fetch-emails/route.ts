@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import Imap from 'imap-simple';
 import { simpleParser } from 'mailparser';
 import { prisma } from '@/lib/prisma';
-import { analyzeEmail } from '@/lib/ai/gemini';
+import { analyzeEmail } from '@/lib/ai/openrouter';
 
 // Set standard timeout for Vercel Cron
 export const maxDuration = 60; // 60 seconds

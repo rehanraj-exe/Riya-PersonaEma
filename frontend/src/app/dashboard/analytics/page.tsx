@@ -27,6 +27,7 @@ export default function AnalyticsPage() {
   }, []);
 
   if (loading || !data) return <div className="p-8 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>;
+  if (data.error) return <div className="p-8 flex justify-center text-red-500">Error: {data.error}. Please try refreshing or checking your session.</div>;
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">

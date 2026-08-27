@@ -1,0 +1,9 @@
+[build]
+  # Tell Netlify that the main application is in the frontend folder
+  base = "frontend"
+  
+  # The command to build the Next.js application
+  command = "npx prisma generate && npm run build"
+  
+  # The directory where Next.js places the static files / build output
+  publish = ".next"

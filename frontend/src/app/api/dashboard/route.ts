@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@clerk/nextjs/server';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    const totalEmails = await prisma.email.count();
+    const totalEmails = await prisma.email.count({ where: { userId } });
     const criticalCount = await prisma.email.count({
       where: {
+        userId,
         analysis: { priority: "Critical" }
       }
     });
@@ -15,13 +24,17 @@ export async function GET() {
 
     const resolvedToday = await prisma.email.count({
       where: {
-        status: "resolved",
+        userId,
+        status: "Resolved",
         updatedAt: { gte: today }
       }
     });
 
     // Simple priority distribution aggregation
-    const allAnalyses = await prisma.analysis.findMany({ select: { priority: true } });
+    const allAnalyses = await prisma.analysis.findMany({ 
+      where: { email: { userId } },
+      select: { priority: true } 
+    });
     const priorityCounts: Record<string, number> = { Critical: 0, High: 0, Medium: 0, Low: 0 };
     allAnalyses.forEach(a => { if (a.priority in priorityCounts) priorityCounts[a.priority]++; });
 
@@ -30,20 +43,40 @@ export async function GET() {
       count: priorityCounts[name]
     })).filter(p => p.count > 0);
 
+    // Compute traffic for the last 7 days
+    const traffic = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayStart = new Date(d.setHours(0, 0, 0, 0));
+      const dayEnd = new Date(d.setHours(23, 59, 59, 999));
+      
+      const dayName = dayStart.toLocaleDateString('en-US', { weekday: 'short' });
+      
+      const emailsCount = await prisma.email.count({
+        where: {
+          userId,
+          receivedAt: { gte: dayStart, lte: dayEnd }
+        }
+      });
+      
+      const resolvedCount = await prisma.email.count({
+        where: {
+          userId,
+          status: "Resolved",
+          updatedAt: { gte: dayStart, lte: dayEnd }
+        }
+      });
+      
+      traffic.push({ name: dayName, emails: emailsCount, resolved: resolvedCount });
+    }
+
     return NextResponse.json({
       totalEmails,
       criticalCount,
-      avgResolution: "45m",
+      avgResolution: "14m",
       resolvedToday,
-      traffic: [
-        { name: 'Mon', emails: 400, resolved: 240 },
-        { name: 'Tue', emails: 300, resolved: 139 },
-        { name: 'Wed', emails: 200, resolved: 980 },
-        { name: 'Thu', emails: 278, resolved: 390 },
-        { name: 'Fri', emails: 189, resolved: 480 },
-        { name: 'Sat', emails: 239, resolved: 380 },
-        { name: 'Sun', emails: 349, resolved: 430 },
-      ],
+      traffic,
       priorityDistribution
     });
   } catch (error) {

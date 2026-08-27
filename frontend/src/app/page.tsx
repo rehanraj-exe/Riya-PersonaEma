@@ -3,10 +3,11 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Inbox, ShieldAlert, Sparkles, BarChart2 } from "lucide-react";
 import Link from "next/link";
-
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 
 export default function Home() {
+  const { isLoaded, userId } = useAuth();
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-background">
       {/* Background gradients */}
@@ -14,9 +15,9 @@ export default function Home() {
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/5 blur-[120px] pointer-events-none" />
       
       <div className="absolute top-4 right-8 z-50">
-        <SignedIn>
+        {isLoaded && userId && (
           <UserButton />
-        </SignedIn>
+        )}
       </div>
 
       <motion.div 
@@ -39,18 +40,17 @@ export default function Home() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <SignedIn>
+          {isLoaded && userId ? (
             <Link href="/dashboard" className="w-full sm:w-auto px-8 py-3 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
               Go to Dashboard <ArrowRight className="w-4 h-4" />
             </Link>
-          </SignedIn>
-          <SignedOut>
+          ) : (
             <SignInButton mode="modal">
               <button className="w-full sm:w-auto px-8 py-3 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
                 Sign In to Start
               </button>
             </SignInButton>
-          </SignedOut>
+          )}
           <button className="w-full sm:w-auto px-8 py-3 rounded-md bg-secondary text-secondary-foreground font-medium hover:bg-secondary/80 transition-colors border border-border">
             View Documentation
           </button>

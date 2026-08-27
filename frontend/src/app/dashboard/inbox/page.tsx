@@ -22,7 +22,12 @@ export default function InboxPage() {
       try {
         const res = await fetch('/api/emails');
         const data = await res.json();
-        setEmails(data);
+        if (Array.isArray(data)) {
+          setEmails(data);
+        } else {
+          console.error("API returned non-array data:", data);
+          setEmails([]);
+        }
       } catch (error) {
         console.error("Failed to fetch emails", error);
       } finally {
@@ -133,8 +138,8 @@ export default function InboxPage() {
                       </div>
                     </div>
 
-                    {/* AI Draft Response Block for Urgent Emails */}
-                    {(email.analysis?.priority === "Critical" || email.analysis?.priority === "High") && email.analysis?.suggestedReply && (
+                    {/* AI Draft Response Block */}
+                    {email.analysis?.suggestedReply && (
                       <div className="mt-4 ml-9 p-3 rounded-lg bg-primary/5 border border-primary/20 relative">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs font-semibold text-primary flex items-center gap-1">

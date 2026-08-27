@@ -7,14 +7,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  role      String   @default("Employee") // Admin, Manager, Support, Employee
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  emails    Email[]
+model ImapSettings {
+  id           String   @id @default(cuid())
+  userId       String   @unique // Clerk User ID
+  imapUser     String
+  imapPassword String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Email {
@@ -31,8 +30,7 @@ model Email {
   updatedAt   DateTime @updatedAt
 
   analysis    Analysis?
-  userId      String?
-  assignedTo  User?    @relation(fields: [userId], references: [id])
+  userId      String?  // Clerk User ID
 }
 
 model Analysis {

@@ -11,7 +11,6 @@ import { Inbox, AlertCircle, CheckCircle2, Clock, Send } from "lucide-react";
 export default function Dashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [simulating, setSimulating] = useState(false);
 
   const fetchStats = async () => {
     try {
@@ -29,27 +28,6 @@ export default function Dashboard() {
     fetchStats();
   }, []);
 
-  const simulateEmail = async () => {
-    setSimulating(true);
-    try {
-      await fetch('/api/emails', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sender: "john.doe@acmecorp.com",
-          subject: "Urgent: Payment failed on enterprise plan",
-          body: "Hello, our credit card was declined for the recent renewal of our Enterprise Plan. Our systems are now locked out. Please help us resolve this immediately!"
-        })
-      });
-      // Refresh stats
-      await fetchStats();
-    } catch (error) {
-      console.error("Failed to simulate email", error);
-    } finally {
-      setSimulating(false);
-    }
-  };
-
   if (loading || !data) return <div className="p-8 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>;
 
   return (
@@ -63,14 +41,6 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
           <p className="text-muted-foreground">Monitor your email triage performance in real-time.</p>
         </div>
-        <button 
-          onClick={simulateEmail}
-          disabled={simulating}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-        >
-          {simulating ? <div className="animate-spin w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full" /> : <Send className="w-4 h-4" />}
-          Simulate Incoming Email
-        </button>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

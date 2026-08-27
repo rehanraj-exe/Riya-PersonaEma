@@ -1,12 +1,21 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@clerk/nextjs/server';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    const totalEmails = await prisma.email.count();
+    const totalEmails = await prisma.email.count({ where: { userId } });
     
     const urgentCount = await prisma.analysis.count({
       where: {
+        email: { userId },
         OR: [
           { priority: "Critical" },
           { priority: "High" }
@@ -16,22 +25,22 @@ export async function GET() {
 
     const spamCount = await prisma.analysis.count({
       where: {
+        email: { userId },
         category: {
-          contains: "Spam",
-          mode: "insensitive"
+          contains: "Spam"
         }
       }
     });
 
     const normalCount = await prisma.analysis.count({
       where: {
+        email: { userId },
         priority: {
           notIn: ["Critical", "High"]
         },
         category: {
           not: {
-            contains: "Spam",
-            mode: "insensitive"
+            contains: "Spam"
           }
         }
       }
