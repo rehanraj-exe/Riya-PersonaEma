@@ -14,7 +14,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch('/api/analytics');
+        const res = await fetch(`/api/analytics?t=${Date.now()}`);
         const json = await res.json();
         setData(json);
       } catch (error) {

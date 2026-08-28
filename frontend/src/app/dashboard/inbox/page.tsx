@@ -20,7 +20,7 @@ export default function InboxPage() {
   useEffect(() => {
     const fetchEmails = async () => {
       try {
-        const res = await fetch('/api/emails');
+        const res = await fetch(`/api/emails?t=${Date.now()}`);
         const data = await res.json();
         if (Array.isArray(data)) {
           setEmails(data);

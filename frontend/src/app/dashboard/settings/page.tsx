@@ -13,7 +13,7 @@ export default function SettingsPage() {
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
   useEffect(() => {
-    fetch('/api/settings')
+    fetch(`/api/settings?t=${Date.now()}`)
       .then(res => res.json())
       .then(data => {
         if (data.hasSettings) {
