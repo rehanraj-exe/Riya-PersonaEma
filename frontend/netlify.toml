@@ -1,5 +1,0 @@
-[build]
-  
-  # The command to build the Next.js application
-  command = "npx prisma generate && npm run build"
-
