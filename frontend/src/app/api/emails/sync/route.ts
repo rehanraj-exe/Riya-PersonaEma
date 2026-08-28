@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
     try {
       const connection = await Imap.connect(config);
-      await connection.openBox('INBOX');
+      // Search options
 
       // Fetch the last 10 emails instead of just UNSEEN, to ensure we grab them even if already seen
       // by the user's main device or Gmail app.
@@ -68,7 +68,8 @@ export async function POST(request: Request) {
           const parsed = await simpleParser(all.body);
           const from = (header.body as any)?.from?.[0] || "Unknown Sender";
           const subjectRaw = (header.body as any)?.subject?.[0] || "No Subject";
-          const messageId = (header.body as any)?.['message-id']?.[0] || `${Date.now()}-${Math.random()}`;
+          const originalMessageId = (header.body as any)?.['message-id']?.[0] || `${Date.now()}-${Math.random()}`;
+          const messageId = `${originalMessageId}-${settings.userId}`;
           const dateRaw = item.attributes.date ? new Date(item.attributes.date) : new Date();
           const to = (header.body as any)?.to?.[0] || settings.imapUser || "Unknown Receiver";
           
