@@ -16,6 +16,7 @@ export default function InboxPage() {
   const [filter, setFilter] = useState("All");
   const [emails, setEmails] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     const fetchEmails = async () => {
@@ -37,6 +38,26 @@ export default function InboxPage() {
     fetchEmails();
   }, []);
 
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch('/api/emails/sync', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        // Refetch emails after sync
+        const freshRes = await fetch(`/api/emails?t=${Date.now()}`);
+        const freshData = await freshRes.json();
+        if (Array.isArray(freshData)) setEmails(freshData);
+      } else {
+        console.error("Sync failed:", data.error);
+      }
+    } catch (error) {
+      console.error("Failed to sync", error);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
@@ -54,6 +75,14 @@ export default function InboxPage() {
               className="pl-9 pr-4 py-2 rounded-md bg-secondary border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary w-64"
             />
           </div>
+          <button 
+            onClick={handleSync}
+            disabled={syncing}
+            className="flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+          >
+            {syncing ? <div className="animate-spin w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full" /> : <Clock className="w-4 h-4" />}
+            Sync Now
+          </button>
           <button className="p-2 rounded-md bg-secondary border border-border hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors">
             <Filter className="w-4 h-4" />
           </button>
